@@ -1,5 +1,5 @@
 import math
-from hash_functions import hyper_fib_hash, hyper_hash_function
+from hash_functions import hyper_hash1
 import multiprocessing
 
 
@@ -18,7 +18,7 @@ def get_alpha_m(b):
 
 class HyperLogLog:
 
-    def __init__(self, h=hyper_fib_hash, b=16):
+    def __init__(self, h=hyper_hash1, b=16):
         self.alpha_m = get_alpha_m(b)
         self.b = b
         self.m = 1 << b
@@ -26,12 +26,12 @@ class HyperLogLog:
         self.M = [0 for i in range(self.m)]
     
     def _get_j(self, x):
-        # return x >> (32-self.b)
-        return x & (self.m-1)
+        return x >> (32-self.b)
+        # return x & (self.m-1)
 
     def _get_w(self, x):
-        # return x - ((x >> (32-self.b)) << (32-self.b))
-        return x >> self.b
+        return x - ((x >> (32-self.b)) << (32-self.b))
+        # return x >> self.b
 
     def _rho(self, x):
         rho = 32 - self.b - x.bit_length() + 1
@@ -88,7 +88,7 @@ class HyperLogLog:
         return E
 
     @classmethod
-    def hyper_log_log(cls, multi_set, h, b):
+    def hyper_log_log(cls, multi_set, h=hyper_hash1, b=16):
         if len(multi_set) > 10000:
             return cls._paralell_hyper_log_log(multi_set, h=h, b=b)
         else:
@@ -125,4 +125,3 @@ class HyperLogLog:
             for r in results[1:]:
                 sum_hll += r
             return len(sum_hll)
-

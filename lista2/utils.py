@@ -2,7 +2,7 @@ import random
 from matplotlib import pyplot as plt
 from min_count import MinCount
 from hyper_log_log import HyperLogLog
-from hash_functions import fibonacci_hash, hyper_fib_hash
+from hash_functions import *
 
 
 """
@@ -24,7 +24,6 @@ Plotting
 """
 def plot_hash_values(h, data_set):
     results = [h(x) for x in data_set]
-    
     print('unique hashes: ', len(set(results)), '    all values: ', len(data_set))
     plt.figure()
     plt.scatter([i for i in range(len(data_set))], results, s=1.5)
@@ -42,7 +41,7 @@ def plot_5b(max_set_len=10000, step=1, data_gen=get_test_multiset):
         result_k = ([], [])
         for n in range(1, max_set_len, step):
             ms = data_gen(n)
-            count = MinCount.min_count(ms, h=fibonacci_hash, k=k)
+            count = MinCount.min_count(ms, h=fib_hash, k=k)
             result_k[0].append(n)
             result_k[1].append(count/n)
             if n % 1000 == 1:

@@ -1,10 +1,10 @@
 import random
 import math
-from hash_functions import fibonacci_hash
+from hash_functions import hash1
 
 
 class MinCount:
-    def __init__(self, h=fibonacci_hash, k=100):
+    def __init__(self, h=hash1, k=100):
         self.h = h
         self.k = k
         self.M = [1 for i in range(k)]
@@ -25,7 +25,7 @@ class MinCount:
             return (self.k-1)/self.M[-1]
 
     @classmethod
-    def min_count(cls, multi_set, h=fibonacci_hash, k=100):
+    def min_count(cls, multi_set, h=hash1, k=100):
         mc = cls(h=h, k=k)
         for x in multi_set:
             mc.add(x)

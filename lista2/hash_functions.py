@@ -35,6 +35,9 @@ def hash2(x, q=32):
     x ^= (x << 5) 
     return x / (1 << q) % 1
 
+def shift_hash(x, q=32):
+    return x >> (32-10)
+
 """
 Hash functions for HyperLogLog - return value from range [0, 2**b)
 """

@@ -1,9 +1,16 @@
+import math
 import random
 from matplotlib import pyplot as plt
 from min_count import MinCount
 from hyper_log_log import HyperLogLog
 from hash_functions import *
 
+
+"""
+"""
+def chebyshev_delta(alpha, k):
+    delta = math.sqrt(1/(k-2)) / math.sqrt(alpha)
+    return delta
 
 """
 Data generators
@@ -36,22 +43,22 @@ def plot_hash_values(h, data_set):
 def plot_5b(max_set_len=10000, step=1, data_gen=get_test_multiset):
     possible_k = [2, 3, 10, 100, 400]
 
-    results = []
+    results = {}
     for k in possible_k:
         result_k = ([], [])
-        for n in range(1, max_set_len, step):
-            ms = data_gen(n)
-            count = MinCount.min_count(ms, h=fib_hash, k=k)
-            result_k[0].append(n)
-            result_k[1].append(count/n)
-            if n % 1000 == 1:
-                print(k, n)
-        results.append(result_k)
+        results[k] = result_k
 
-    data = list(zip(possible_k, results))
+    for n in range(1, max_set_len, step):
+        ms = data_gen(n)
+        for k in possible_k:
+            count = MinCount.min_count(ms, h=hash1, k=k)
+            results[k][0].append(n)
+            results[k][1].append(count/n)
+        if n % 1000 == 1:
+            print(n)
 
     plt.figure(figsize=(8,8))
-    for k, arg in data:
+    for k, arg in results.items():
         plt.plot(arg[0], arg[1], label=f'k = {k}')
         plt.legend()
     plt.grid()
@@ -60,7 +67,7 @@ def plot_5b(max_set_len=10000, step=1, data_gen=get_test_multiset):
     plt.title(f"MinCount for different k values")
     plt.show()
 
-    for k, arg in data:
+    for k, arg in results.items():
         plt.figure(figsize=(8,8))
         plt.plot(arg[0], arg[1])
         plt.grid()
@@ -71,24 +78,23 @@ def plot_5b(max_set_len=10000, step=1, data_gen=get_test_multiset):
     
 
 def plot_8(max_set_len=10000, step=1, data_gen=get_test_multiset):
-    possible_b = [6, 11, 16]
+    possible_b = [6, 12, 16]
 
-    results = []
+    results = {}
     for b in possible_b:
-        results_b = ([], [])
-        for n in range(1, max_set_len, step):
-            M = data_gen(n)
-            est = HyperLogLog.hyper_log_log(M, h=hyper_fib_hash, b=b)
-            results_b[0].append(n)
-            results_b[1].append(est/n)
-            if n % 1000 == 1:
-                print(b, n)
-        results.append(results_b)
+        results[b] = ([], [])
     
-    data = list(zip(possible_b, results))
-
+    for n in range(1, max_set_len, step):
+        M = data_gen(n)
+        for b in possible_b:
+            est = HyperLogLog.hyper_log_log(M, h=hyper_hash1, b=b)
+            results[b][0].append(n)
+            results[b][1].append(est/n)
+        if n % 1000 == 1:
+            print(n)
+    
     plt.figure(figsize=(8,8))
-    for b, arg in data:
+    for b, arg in results.items():
         m = 1 << b
         plt.plot(arg[0], arg[1], label=f'm = {m}')
         plt.legend()
@@ -98,7 +104,7 @@ def plot_8(max_set_len=10000, step=1, data_gen=get_test_multiset):
     plt.title(f"HyperLogLog for different m values")
     plt.show()
 
-    for b, arg in data:
+    for b, arg in results.items():
         m = 1 << b
         plt.figure(figsize=(8,8))
         plt.plot(arg[0], arg[1])

@@ -4,9 +4,14 @@ from hash_functions import hash1
 
 
 class MinCount:
-    def __init__(self, h=hash1, k=100):
+    def __init__(self, h=hash1, k=100, mem=None):
+        if not callable(h):
+            raise Exception('Parameter h need to be a function.')
         self.h = h
-        self.k = k
+        if mem:  # memory limit first
+            self.k = mem // 32
+        else:
+            self.k = k
         self.M = [1 for i in range(k)]
 
     def add(self, x):
@@ -17,6 +22,9 @@ class MinCount:
 
     def __len__(self):
         return round(self._estimate())
+
+    def memory(self):
+        return 32 * self.k
 
     def _estimate(self):
         if self.M[-1] == 1:

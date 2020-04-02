@@ -25,6 +25,40 @@ class HyperLogLog:
         self.h = h
         self.M = [0 for i in range(self.m)]
     
+    def __eq__(self, other):
+        # If self == other, then can be merged
+        return self.b == other.b
+
+    def __ne__(self, other):
+        return self.b != other.b
+
+    def __add__(self, other):
+        """
+        Merge 2 HyperLogLog objects, and return new one. (+ operator)
+        """
+        if self != other:
+            raise Exception('Exception in __add__')
+        new = HyperLogLog(self.h, self.b)
+        for i, _ in enumerate(new.M):
+            new.M[i] = self.M[i] if self.M[i] > other.M[i] else other.M[i]
+        return new
+
+    def __iadd__(self, other):
+        """
+        Merge 2 HyperLogLog objects, and save result in self. (+= operator)
+        """
+        if self != other:
+            raise Exception('Exception in __add__')
+        for i, val in enumerate(self.M):
+            self.M[i] = other.M[i] if other.M[i] > val else val
+        return self
+
+    def __len__(self):
+        """
+        Return estimated len of multiset.
+        """
+        return round(self._estimate())
+    
     def _get_j(self, x):
         return x >> (32-self.b)
         # return x & (self.m-1)
@@ -45,30 +79,6 @@ class HyperLogLog:
         w = self._get_w(hash_x)
         self.M[j] = max(self.M[j], self._rho(w))
 
-    def __eq__(self, other):
-        return self.b == other.b
-
-    def __ne__(self, other):
-        return self.b != other.b
-
-    def __add__(self, other):
-        if self != other:
-            raise Exception('Exception in __add__')
-        new = HyperLogLog(self.h, self.b)
-        for i, _ in enumerate(new.M):
-            new.M[i] = self.M[i] if self.M[i] > other.M[i] else other.M[i]
-        return new
-
-    def __iadd__(self, other):
-        if self != other:
-            raise Exception('Exception in __add__')
-        for i, val in enumerate(self.M):
-            self.M[i] = other.M[i] if other.M[i] > val else val
-        return self
-
-    def __len__(self):
-        return round(self._estimate())
-
     def _estimate(self):
         E = self.alpha_m * self.m * self.m / sum( math.pow(2, -x) for x in self.M )
     
@@ -87,9 +97,16 @@ class HyperLogLog:
             E = -(1 << 32) * math.log(1 - E / (1 << 32))        
         return E
 
+    def memory(self):
+        return self.m * 5
+
     @classmethod
     def hyper_log_log(cls, multi_set, h=hyper_hash1, b=16):
-        if len(multi_set) > 10000:
+        """
+        Perform HyperLogLog algorithm for specified multiset, hashfunc 
+        and num of registers == 2**b.
+        """
+        if len(multi_set) > 30000:
             return cls._paralell_hyper_log_log(multi_set, h=h, b=b)
         else:
             return cls._hyper_log_log(multi_set, h=h, b=b)
@@ -110,6 +127,9 @@ class HyperLogLog:
 
     @classmethod
     def _paralell_hyper_log_log(cls, multiset, h, b, workers=None):
+        """
+        Parallel implementation, using multiprocessing package
+        """
         if not workers:
             workers = multiprocessing.cpu_count()
         

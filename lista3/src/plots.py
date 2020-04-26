@@ -75,10 +75,10 @@ if __name__ == '__main__':
     alphas = [0.005, 0.01, 0.05]
     files = get_data_files('./unique_sum_data/')
     for file in files:
-        # draw_1(file)
-        draw_2(file, alphas[2])
+        draw_1(file)
+        # draw_2(file, alphas[2])
 
-    # files = get_data_files('./unique_avg_data/')
-    # for file in files:
-    #     draw_1(file)
+    files = get_data_files('./unique_avg_data/')
+    for file in files:
+        draw_1(file)
         # draw_2(file, alphas[2])

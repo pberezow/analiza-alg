@@ -1,0 +1,123 @@
+\documentclass{article}
+\title{Analiza algorytmów. Lista 4}
+\author{Piotr Berezowski, 236749}
+
+\usepackage{polski}
+\usepackage[utf8]{inputenc}
+\usepackage{enumerate}
+% \usepackage{subfig}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{cleveref}
+\usepackage{cases}
+\usepackage{mathtools}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage[ruled,vlined,linesnumbered,longend]{algorithm2e}
+\graphicspath{ {./src/} }
+
+\newenvironment{pseudokod}[1][htb]{
+	\renewcommand{\algorithmcfname}{}
+	\begin{algorithm}[#1]%
+	}{
+\end{algorithm}
+}
+
+\begin{document}
+	\maketitle
+	\pagenumbering{gobble}
+	\newpage
+    \pagenumbering{arabic}
+    
+
+	\section{Zadanie 12}
+	\subsection{Opis zadania}
+    Zaimplementuj symulator algorytmu Mutual Exclusion Dijkstry. Dla ustalonego $n$ oznaczającego liczbę procesów w pierścieniu, zweryfikuj, 
+    że startując z dowolnej konfiguracji początkowej algorytm przejdzie do legalnej konfiguracji. Jeśli z pewnej konfiguracji można przejść 
+    do kilku możliwych konfiguracji w zależności od tego, który proces wykona krok jako pierwszy, każde wykonanie powinno zostać zweryfikowane. 
+    Jaka jest największa liczba kroków do czasu osiągnięcia legalnej konfiguracji dla ustalonego $n$? Dla jakich wartości $n$ możesz uzyskać 
+    odpowiedź w sensownym czasie? Za zadanie możesz otrzymać $3 \times N$ punktów, gdzie $N$ oznacza największą wartość $n$, dla której uda Ci się 
+    zweryfikować algorytm.
+    
+    \subsection{Rozwiązanie}
+
+    Implementacja zadania znajduje się w pliku \textit{zad1.py}. 
+
+    Największa wartość $n$ dla jakiej algorytm udało się zweryfikować jest $n = 7$, gdzie suma wszystkich możliwych konfiguracji 
+    jest równa $2097152$. Największa liczba kroków do legalnej konfiguracji dla takiego 
+    $n$ jest równa $57$.
+
+    Poniżej w tabeli przedstawiono wyniki dla kolejnych wartości $n$, dla których udało się zweryfikować algorytm.
+
+    \begin{table}[H]
+        \begin{center}
+            \resizebox{\textwidth}{!}{%
+            \begin{tabular}{c||c|c|c}
+                \textbf{n} & \textbf{Ilość wszystkich konfiguracji} & \textbf{Ilość wszystkich możliwych przejść} & \textbf{Max liczba kroków} \\
+                \hline
+
+                1 & 2 & 0 & 0 \\
+                2 & 9 & 6 & 1 \\
+                3 & 64 & 108 & 4 \\
+                4 & 625 & 1620 & 15 \\
+                5 & 7776 & 27210 & 26 \\
+                6 & 117649 & 521010 & 40 \\
+                7 & 2097152 & 11272184 & 57 \\
+                
+            \end{tabular}
+            }
+        \end{center}
+        \caption{Wyniki dla przypadków testowych z pliku \textit{gapd.txt}. (*) $cap / cap_{max}$ przedstawia stosunek użytej pojemności maszyny 
+            w wyznaczonym rozwiązaniu do maksymalnej pojemności maszyny. W tabeli przedstawiono minimalny, średni i maksymalny stosunek.}
+        \label{wyniki-d}
+    \end{table}
+
+
+    \section{Zadanie 13}
+	\subsection{Opis zadania}
+    Rozważmy graf $G= (V,E)$. Dwa wierzchołki $v,w \in V$ nazywamy niezależnymi, jeśli $\{v,w\} \notin E$. Podzbiór $S \subseteq V$ wierzchołków 
+    nazywamy niezależnym, jeśli wszystkie jego elementy są parami niezależne. Wzorując się na algorytmie Maximal Matching podanym na wykładzie 
+    zaprojektuj, zaimplementuj i przetestuj samostabilizujący algorytm znajdujący maksymalny zbiór niezależny (ang. Maximal Independent Set) 
+    w nieskierowanym grafie spójnym. Podaj przekonywujące uzasadnienie poprawności algorytmu (formalny dowód - zadanie na ćwiczenia). 
+    Algorytmy znajdowania maksymalnego zbioru niezależnego mają wiele zastosowań, możesz np. myśleć o problemie przydziału częstotliwości 
+    w sieciach bezprzewodowych.
+    
+    \subsection{Rozwiązanie}
+
+    Implementacja zadania znajduje się w pliku \textit{zad2.py}.
+
+    Każdy proces odpowiada pojedynczemu wierzchołkowi w grafie. Każdy proces kontroluje jeden rejestr $r_p \in \{0, 1\}$ który przechowuje 
+    informacje o tym, czy dany wierzchołek należy do zbioru niezależnego. $N(p)$ oznacza zbiór sąsiadów $p$. 
+    W każdym kroku algorytmu, dla wierzchołka $p$ możemy znajdować się w jednej z następujących sytuacji:
+    \begin{enumerate}
+        \item Wszystkie wierzchołki $q \in N(p)$ spełniają $r_q = 0$.
+        \item Przynajmniej jeden wierzchołek $q \in N(p)$ spełnia $r_q = 1$.
+    \end{enumerate}
+
+    W przypadku sytuacji 1, jeśli $r_p = 0$, to ustawiamy $r_p \gets 1$, w przeciwnym przypadku nie robimy nic.
+
+    W przypadku sytuacji 2, jeśli $r_p = 1$, to ustawiamy $r_p \gets 0$, w przeciwnym przypadku nie robimy nic.
+    
+    Po ustabilizowaniu się algorytmu (wyznaczeniu maksymalnego zbioru niezależnego) żaden jego krok nie zmieni obecnej konfiguracji. 
+    Wszyscy sąsiedzi wierzchołków oetykietowanych numerem $1$ będą miały ustawioną wartość rejestru na 0 (sytuacja 2), a wszyscy sąsiedzi 
+    wierzchołków oetykietowanych numerem $0$ będą miały tylko jednego sąsiada z wartością rejestru równą 1. Widzimy, że w tym przypadku 
+    wierzchołki, które zostały oetykietowane numerem $1$ tworzą pewien maksymalny zbiór niezależny.
+
+    Poniżej przedstawiono pseudokod pętli wykonywanej przez każdy z procesów.
+
+    \begin{pseudokod}[H]
+        \caption{Każdy proces $p$ wykonuje pętle}
+        \While{True} {
+            \BlankLine
+            \If{$r_p = 0 \land (\forall_{q \in N(p)}) (r_q = 0)$} {
+                $r_p \gets 1$\;
+            }
+            \If{$r_p = 1 \land (\exists_{q \in N(p)}) (r_q = 1)$} {
+                $r_p \gets 0$\;
+            }
+        }
+    \end{pseudokod}
+
+\end{document}

@@ -74,6 +74,44 @@ def traverse(actual_conf, configurations, edges):
 
     configurations[idx] = True
 
+def dfs(actual_idx, configurations, order, n):
+    if configurations[actual_idx]:
+        return
+    
+    conf = index_to_configuration(actual_idx, n)
+    transitions = get_possible_transitions(conf)
+
+    for c in transitions:
+        i = configuration_to_index(c)
+        if configurations[i]:
+            continue
+        dfs(i, configurations, order, n)
+
+    order.append(actual_idx)
+    configurations[actual_idx] = True
+
+def traverse2(n):
+    order = []
+    configurations = get_configurations(n)
+    
+    for idx in range(len(configurations)):
+        dfs(idx, configurations, order, n)
+    
+    longest_path = [0 if i == True else -1 for i in get_configurations(n)]
+    
+    for idx in order:
+        conf = index_to_configuration(idx, n)
+        transitions = get_possible_transitions(conf)
+
+        longest_path[idx] = 1
+        for c in transitions:
+            i = configuration_to_index(c)
+            if longest_path[i] >= longest_path[idx]:
+                longest_path[idx] = longest_path[i] + 1
+
+    print(f'n = {n} \n  Valid configurations: {sum(configurations)}\n  All configurations: {len(configurations)}\n  PathLen: {max(longest_path)}')
+    print(f'  Longest path: {max(longest_path)}')
+
 def _convert_edges(edges_list, num_of_vertices):
     """
     Transforms list of edges to prevent filtering edges in each step 
@@ -82,8 +120,6 @@ def _convert_edges(edges_list, num_of_vertices):
     edges = [[] for i in range(num_of_vertices)]
     for v0, v1 in edges_list:
         edges[v1].append(v0)
-    # for i in range(num_of_vertices):
-    #     edges[i] = [e[0] for e in filter(lambda e: e[1] == i, edges_list)]
 
     return edges
 
@@ -120,11 +156,14 @@ def simulation(n, with_longest_path=True):
         safe_indices = [configuration_to_index(c) for c in [[i for j in range(n)] for i in range(n+1)]]
         longest_path = max([get_longest_path(converted_edges, safe_indices, v1, True) for v1 in safe_indices])
 
-    print(f'Sum: {sum(configurations)},   Len: {len(configurations)},   Edges: {len(edges)},   PathLen: {longest_path}')
+    print(f'n = {n} \n  Valid configurations: {sum(configurations)}\n  All configurations: {len(configurations)}\n  Edges: {len(edges)}\n  PathLen: {longest_path or "-"}')
 
 
 if __name__ == '__main__':
-    n = 5
+    n = 7
     t0 = time.time()
-    simulation(n)
+    traverse2(n)
+    print(f'Time: {time.time() - t0} s')
+    t0 = time.time()
+    simulation(n, False)
     print(f'Time: {time.time() - t0} s')

@@ -1,6 +1,9 @@
 import time
 
 def index_to_configuration(index, n):
+    """
+    Map index to configuration
+    """
     # C = (1,2,3,4,5) ==> 1 + 2*6 + 3*6^2 + 4*6^3 + 5*6^4
     conf = [0 for i in range(n)]
     for i in reversed([j for j in range(n)]):
@@ -11,6 +14,9 @@ def index_to_configuration(index, n):
     return conf
 
 def configuration_to_index(conf):
+    """
+    Map configuration to index
+    """
     index = 0
     n = len(conf)
     for i in range(n):
@@ -18,9 +24,20 @@ def configuration_to_index(conf):
     return index
 
 def get_configurations(n):
-    return [0 for i in range((n+1)**n)]
+    """
+    Return list with bool values for all configurations for given 'n'
+    Set safe configurations to True
+    """
+    configurations = [False for i in range((n+1)**n)]
+    for safe_idx in [configuration_to_index(c) for c in [[i for j in range(n)] for i in range(n+1)]]:
+        configurations[safe_idx] = True
+    return configurations
 
 def get_possible_transitions(conf):
+    """
+    Return list of all possible transitions from configuration 'conf'
+     - Configurations as lists
+    """
     transitions = []
     
     if conf[0] == conf[-1]:
@@ -36,117 +53,78 @@ def get_possible_transitions(conf):
     
     return transitions
 
-    
+def traverse(actual_conf, configurations, edges):
+    """
+    Traverse from given configuration recursively to safe configuration 
+        or previously visited configuration
+    Set configuration's value to True in bool list for each visited configuration
+    Push new edge for each possible transition
+    """
+    idx = configuration_to_index(actual_conf)
+    if configurations[idx]:
+        return
 
-# def get_reversed_transitions(conf):
-#     transitions = []
+    transitions = get_possible_transitions(actual_conf)
+    for conf in transitions:
+        i = configuration_to_index(conf)
+        edges.append((idx, i))
+        if configurations[i]:
+            continue
+        traverse(conf, configurations, edges)
 
-#     if (conf[0] - 1) % (len(conf) + 1) == conf[-1]:
-#         pre_conf = [*conf]
-#         pre_conf[0] = (pre_conf[0] - 1) % (len(conf) + 1)
-#         transitions.append(pre_conf)
-
-#     for i in range(1, len(conf)):
-#         if conf[i] == conf[i-1]:
-#             for j in range(len(conf)+1):
-#                 if j == conf[i]:
-#                     continue
-#                 pre_conf = [*conf]
-#                 pre_conf[i] = j
-#                 transitions.append(pre_conf)
-    
-#     return transitions
-
-# def traverse_back(actual_conf, configurations, edges):
-#     idx = configuration_to_index(actual_conf)
-#     if configurations[idx]:
-#         return
-#     configurations[idx] = 1
-
-#     transitions = get_reversed_transitions(actual_conf)
-#     for conf in transitions:
-#         i = configuration_to_index(conf)
-#         edges.append((i, idx))
-#         if configurations[i]:
-#             continue
-#         traverse(conf, configurations, edges)
-
-# def rev_simulation(n):
-#     configurations = get_configurations(n)
-#     edges = []
-#     safe_confs = [[i for j in range(n)] for i in range(n+1)]
-
-#     for sc in safe_confs:
-#         traverse(sc, configurations, edges)
-
-#     safe_confs_indices = [configuration_to_index(c) for c in safe_confs]
-#     # t0 = time.time()
-#     # paths = []
-#     # for sc in safe_confs_indices:
-#     #     path_len = get_longest_path(edges, safe_confs_indices, sc, True)
-#     #     paths.append(path_len)
-#     # print(f'Time (list of edges): {time.time() - t0} s')
-
-#     # t0 = time.time()
-#     edges_matrix = _to_list_of_edges(edges, len(configurations))
-#     paths = []
-#     for sc in safe_confs_indices:
-#         path_len = get_longest_path2(edges_matrix, safe_confs_indices, sc, True)
-#         paths.append(path_len)
-#     # print(f'Time (matrix-like): {time.time() - t0} s')
-
-
-    # print(f'[<<<] Sum: {sum(configurations)},   Len: {len(configurations)},   Edges: {len(edges)},   MaxLen: {max(paths)}')
+    configurations[idx] = True
 
 def _convert_edges(edges_list, num_of_vertices):
+    """
+    Transforms list of edges to prevent filtering edges in each step 
+    of 'get_longest_path' func
+    """
     edges = [[] for i in range(num_of_vertices)]
-    for i in range(num_of_vertices):
-        edges[i] = [e[0] for e in filter(lambda e: e[1] == i, edges_list)]
+    for v0, v1 in edges_list:
+        edges[v1].append(v0)
+    # for i in range(num_of_vertices):
+    #     edges[i] = [e[0] for e in filter(lambda e: e[1] == i, edges_list)]
 
     return edges
 
 
-def get_longest_path(edges, safe_indices, curr_idx, is_root=False):
+def get_longest_path(edges, safe_indices, v1, is_root=False):
     """
-    Edges as list of list with edges for e[1]
+    Edges has to be transformed by '_convert_edges' function
     """
-    if curr_idx in safe_indices and not is_root:
+    if v1 in safe_indices and not is_root:
         return 0
 
-    # filtered_edges = filter(lambda e: e[1] == curr_idx, edges)
-    paths = []
-    for e in edges[curr_idx]:
-        path_len = get_longest_path(edges, safe_indices, e[0])
-        paths.append(path_len)
-    path_len = 1 + max(paths or [0])
-    
-    return path_len
+    longest_path = 0
+    for v0 in edges[v1]:
+        path_len = get_longest_path(edges, safe_indices, v0)
+        longest_path = path_len if path_len > longest_path else longest_path
 
-def simulation(n):
+    return 1 + longest_path
+
+def simulation(n, with_longest_path=True):
     configurations = get_configurations(n)
     edges = []
 
     for i in range(len(configurations)):
-        if configurations[i] == 1:
+        if configurations[i]:
             continue
 
         conf = index_to_configuration(i, n)
-        configurations[i] = 1  # visited
-
-        possible_transitions = get_possible_transitions(conf)
-        indices = [configuration_to_index(c) for c in possible_transitions]
-
-        for idx in indices:
-            edges.append((i, idx))
+        traverse(conf, configurations, edges)
     
-    print(f'[>>>] Sum: {sum(configurations)},   Len: {len(configurations)},   Edges: {len(edges)}')
+    longest_path = None
+    if with_longest_path:
+        converted_edges = _convert_edges(edges, len(configurations))
+
+        safe_indices = [configuration_to_index(c) for c in [[i for j in range(n)] for i in range(n+1)]]
+        longest_path = max([get_longest_path(converted_edges, safe_indices, v1, True) for v1 in safe_indices])
+
+    print(f'Sum: {sum(configurations)},   Len: {len(configurations)},   Edges: {len(edges)},   PathLen: {longest_path}')
 
 
 if __name__ == '__main__':
     n = 5
-    # t0 = time.time()
-    # simulation(n)
-    # print(f'Time: {time.time() - t0} s')
     t0 = time.time()
-    rev_simulation(n)
+    simulation(n)
     print(f'Time: {time.time() - t0} s')

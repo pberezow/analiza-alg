@@ -1,10 +1,15 @@
+# Informacje
+
+ - Implementacja algorytmu **MinCount** znajduje się w pliku `min_count.py`.
+ - Implementacja algorytmu **HyperLogLog** znajduje się w pliku `hyper_log_log.py`.
+ - Plik `hash_functions.py` zawiera implementacje użytych w testach funkcji haszujących.
+ - W pliku `utils.py` znajdują się funkcje pomocnicze używane do rozwiązania zadań z listy - głównie rysujące wykresy.
+
 # Zadanie 5
 
-Implementacja algorytmu **MinCount** znajduje się w pliku `min_count.py`.
-
  - **a)** Obecność powtórzeń nie powinna mieć wpływu na warotość $\hat{n}$, jeśli używana funkcja haszująca spełnia warunek mówiący o tym, że funkcja haszująca zawsze powinna zwracać tą samą wartość dla tego smego argumentu. 
- - **b)** 
-   Wykres dla zbioru składającego się z losowych wartości z zakresu $[0, 2^{32})$:
+
+ - **b)** Wykres dla zbioru składającego się z losowych wartości z zakresu $[0, 2^{32})$:
     ![MinCount random data all](./mc_random/mc_all_random.png)
     dla k = 2:
     ![MinCount random data](./mc_random/2.png)
@@ -16,7 +21,10 @@ Implementacja algorytmu **MinCount** znajduje się w pliku `min_count.py`.
     ![MinCount random data](./mc_random/100.png)
     dla k = 400:
     ![MinCount random data](./mc_random/400.png)
- - **c)** TODO
+
+ - **c)** Przeprowadzono testy dla różnych wartości $k$ (wykres poniżej) i zauważono, że w okolicach $k = 200$ wynik osiągnął wystarczająco bliski dokładnemu wynik w 95% przypadków. Dla $k = 250$ i większych estymowana wartość była wystarczająco dokładna dla 100% przypadków (testy na zbiorach o liczności od 1 do 10000 elementów).
+  ![...](./5_c.png)
+  Wykres pokazuje ile 
 
 
 # Zadanie 6
@@ -36,7 +44,18 @@ Porównanie wyników dla "dobrej" funkcji i określonej wyżej $h_1$:
 
 # Zadanie 7
 
+Wykresy dla różnych wartości $\alpha$ i nierówności Czebyszewa:
 
+ - $\alpha = 0.5\%$
+  ![...](./7_chebyshev__b.png)
+ - $\alpha = 1\%$
+  ![...](./7_chebyshev_1__b.png)
+ - $\alpha = 5\%$
+  ![...](./7_chebyshev_5__b.png)
+
+Wykresy dla różnych wartości $\alpha$ i nierówności Chernoffa:
+
+  - TODO
 
 # Zadanie 8
 
@@ -53,3 +72,21 @@ $m = 2^{12}$:
 $m = 2^{16}$:
   ![HyperLogLog random data 16](./hll_random/65536.png)
 
+
+
+Porównanie algorytmów HyperLogLog i MinCount dla podobnej ilości używanej pamięci. 
+Zakładamy, że rejestr zajmuje 5 bitów, a pojedynczy hash 32 bity.
+
+ - ~80 bitów pamięci:
+  ![Comp4](./comp/4.png)
+ 
+ - ~320 bitów pamięci:
+  ![Comp6](./comp/6.png)
+ 
+ - ~10240 bitów pamięci:
+  ![Comp11](./comp/11.png)
+
+ - ~327680 bitów pamięci:
+  ![Comp16](./comp/16.png)
+
+Można zauważyć, że HyperLogLog radzi sobie trochę gorzej niż MinCount w momencie kiedy ma do dyspozycji bardzo mało pamięci. Widzimy też że poprawa dokładności wraz ze wzrostem używanej pamięci jest dużo większa w przypadku HyperLogLog niż w przypadku MinCount. Już dla 320 bitów HyperLogLog przybliża $n$ z błędem podobnym do MinCount, a kiedy ilość pamięci jest większa radzi sobie znacznie lepiej.

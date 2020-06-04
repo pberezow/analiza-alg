@@ -43,9 +43,9 @@ def draw_1(data_file):
     plt.grid()
     plt.xlabel('n')
     plt.ylabel('estimated/actual')
-    plt.savefig(data_file.split('.csv')[0] + '.png')
-    # plt.show()
-    plt.close()
+    # plt.savefig(data_file.split('.csv')[0] + '.png')
+    # plt.close()
+    plt.show()
 
 def draw_2(data_file, alpha):
     params_types = [('m', int), ('title', str)]
@@ -66,9 +66,9 @@ def draw_2(data_file, alpha):
     plt.grid()
     plt.xlabel('n')
     plt.ylabel('estimated/actual')
-    plt.savefig(data_file.split('.csv')[0] + f'_cheb_{alpha*100}.png')
-    # plt.show()
-    plt.close()
+    # plt.savefig(data_file.split('.csv')[0] + f'_cheb_{alpha*100}.png')
+    # plt.close()
+    plt.show()
 
 
 if __name__ == '__main__':

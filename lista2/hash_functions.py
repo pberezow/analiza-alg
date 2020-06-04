@@ -65,7 +65,7 @@ def hyper_hash1(x, q=32):
     x = (x >> 16) ^ x % w
     return x
 
-def hyper_hash2(x, q=32):  # nie dziala
+def hyper_hash2(x, q=32):
     x ^= (hash(x) << 13)
     x ^= (x >> 17)    
     x ^= (x << 5) 

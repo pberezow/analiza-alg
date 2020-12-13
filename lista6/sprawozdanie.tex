@@ -1,0 +1,148 @@
+\documentclass{article}
+\title{Analiza algorytmów. Lista 6}
+\author{Piotr Berezowski, 236749}
+
+\usepackage{polski}
+\usepackage[utf8]{inputenc}
+\usepackage{enumerate}
+% \usepackage{subfig}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{cleveref}
+\usepackage{cases}
+\usepackage{mathtools}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage[ruled,vlined,linesnumbered,longend]{algorithm2e}
+\graphicspath{ {./src/} }
+
+\newenvironment{pseudokod}[1][htb]{
+	\renewcommand{\algorithmcfname}{}
+	\begin{algorithm}[#1]%
+	}{
+\end{algorithm}
+}
+
+\begin{document}
+	\maketitle
+	\pagenumbering{gobble}
+	\newpage
+    \pagenumbering{arabic}
+    
+
+	\section{Zadanie 14}
+	\subsection{Opis zadania}
+    Układając odpowiednie równanie rekurencyjne i wykorzystując funkcje tworzące dla danego $n$ wyznacz liczbę wywołań linii $6$ w poniższym 
+    algorytmie. Zweryfikuj odpowiedź eksperymentalnie.
+
+    \begin{pseudokod}[H]
+        \caption{$f(\text{int } n)$}
+
+        $\text{int } s = 0$\;
+        \If{$n == 0$} {
+            \Return{1}
+        }
+        \Else{
+            \For{$\text{int } i = 0; i < n; i++$}{
+                $s += f(i)$\;
+            }
+            \Return{s}
+        }
+
+    \end{pseudokod}
+
+    \subsection{Rozwiązanie}
+
+    Niech $F_{n}$ oznacza liczbę wywołań lini $6$ dla $n$. Dla $n = 0$ linia $6$ nie wykona się ani razu, więc $F_{0} = 0$. 
+
+    W momencie kiedy $n > 0$ linia $6$ wykonuje się rekurencyjnie dla kolejnych $i < n$:
+
+    $$F_{n} = \sum_{i=0}^{n-1} (F_{i} + 1) = n + \sum_{i=0}^{n-1} F_{n}, \ \ \text{dla } n > 0$$
+
+    Zapiszmy różnicę $F_{n+1}$ i $F_{n}$:
+
+    $$F_{n+1} - F_{n} = n + 1 + \sum_{i=0}^{n} F_{i} - n - \sum_{i=0}^{n-1} F_{i}$$
+
+    $$F_{n+1} = 1 + 2 F_{n}$$
+
+    Wyznaczmy teraz funkcję tworzącą $F(z)$ ciągu $F_{n}$:
+
+    \begin{equation*}
+        \begin{split}
+            F(z) = \sum_{n \geq 0} F_{n} z^{n} = F_{0} + \sum_{n \geq 1} F_{n} z^{n} = \sum_{n \geq 0} F_{n+1} z^{n+1} = 
+                z \sum_{n \geq 0} (1 + 2 F_{n}) z^{n} = \\ 
+                2 z \sum_{n \geq 0} F_{n} z^{n} + z \sum_{n \geq 0} z^{n} = 
+                2 z F(z) + z \sum_{n \geq 0} z^{n} = 2 z F(z) + \frac{z}{1 - z}
+        \end{split}
+    \end{equation*}
+
+
+    $$F(z)(1 - 2z) = \frac{z}{1 - z}$$
+
+    $$F(z) = \frac{z}{(1 - z)(1 - 2z)} = \frac{1}{1 - 2z} - \frac{1}{1 - z} = \sum_{n \geq 0} 2^{n} z^{n} - \sum_{n \geq 0} z^{n} = 
+        \sum_{n \geq 0} (2^{n} - 1) z^{n}$$
+
+    Ostatecznie:
+
+    $$[z^{n}] F(z) = F_{n} = 2^{n} - 1$$
+
+    Wyniki dla kolejnych n:
+
+    \begin{table}[H]
+        \begin{center}
+            % \resizebox{\textwidth}{!}{%
+            \begin{tabular}{c||c|c}
+                \textbf{n} & \textbf{\textbf{$F_n$}} & \textbf{Wynik eksperymentalny} \\
+                \hline
+
+                0 & 0 & 0 \\
+                1 & 1 & 1 \\
+                2 & 3 & 3 \\
+                3 & 7 & 7 \\
+                4 & 15 & 15 \\
+                5 & 31 & 31 \\
+                6 & 63 & 63 \\
+                7 & 127 & 127 \\
+                8 & 255 & 255 \\
+                9 & 511 & 511 \\
+                10 & 1023 & 1023 \\
+                11 & 2047 & 2047 \\
+                12 & 4095 & 4095 \\
+                13 & 8191 & 8191 \\
+                14 & 16383 & 16383 \\
+                15 & 32767 & 32767 \\
+                16 & 65535 & 65535 \\
+                17 & 131071 & 131071 \\
+                18 & 262143 & 262143 \\
+                19 & 524287 & 524287 \\
+                20 & 1048575 & 1048575 \\
+                21 & 2097151 & 2097151 \\
+                22 & 4194303 & 4194303 \\
+                23 & 8388607 & 8388607 \\
+                24 & 16777215 & 16777215 \\
+                25 & 33554431 & 33554431 \\
+                26 & 67108863 & 67108863 \\
+                27 & 134217727 & 134217727 \\
+                28 & 268435455 & 268435455 \\
+                29 & 536870911 & 536870911 \\
+                30 & 1073741823 & 1073741823 \\
+                
+            \end{tabular}
+            % }
+        \end{center}
+    \end{table}
+
+    \section{Zadanie 15}
+    \subsection{Opis zadania}
+    Algorytm otrzymuje na wejściu tablicę długości $n \geq 0$. Jeśli $n \geq 2$ dla każdego $k \in \{1,2,3,...,n\}$ algorytm z prawdopodobieństwem 
+    $1/2$ wywołuje się rekurencyjnie na pewnej losowej „podtablicy” długości $k$. Wykorzystując funkcje tworzące wyznacz średnią liczbę 
+    wywołań algorytmu dla danego $n$ i przedstaw swoje wyliczenia. Zweryfikuj odpowiedź eksperymentalnie.
+
+    
+    \subsection{Rozwiązanie}
+
+    
+    
+\end{document}

@@ -89,7 +89,7 @@ def simulation(n):
         conf = index_to_configuration(idx, n)
         transitions = get_possible_transitions(conf)
 
-        longest_path[idx] = 1
+        path_len[idx] = 1
         for c in transitions:
             i = configuration_to_index(c)
             if path_len[i] >= path_len[idx]:
@@ -99,7 +99,7 @@ def simulation(n):
 
 
 if __name__ == '__main__':
-    n = 7
+    n = 8
     t0 = time.time()
     simulation(n)
     print(f'Time: {time.time() - t0} s')
